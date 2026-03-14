@@ -40,7 +40,7 @@ function App() {
   // Fetch Progress when token changes
   useEffect(() => {
     if (token) {
-      fetch('http://localhost:3001/api/progress', {
+      fetch('/api/progress', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -74,7 +74,7 @@ function App() {
     setIsCompiling(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/run', {
+      const response = await fetch('/api/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
@@ -94,7 +94,7 @@ function App() {
         if (topic.validate(data.output)) {
           // If validated, update backend
           if (!completed.has(topic.id)) {
-            fetch('http://localhost:3001/api/progress', {
+            fetch('/api/progress', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
