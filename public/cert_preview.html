@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate Sample</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f0f4f8;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .cert-outer {
+      width: 1123px;
+      height: 794px;
+      padding: 40px;
+      background-color: #0f172a;
+      /* Simple geometric background pattern */
+      background-image: radial-gradient(#1e293b 2px, transparent 2px), radial-gradient(#1e293b 2px, transparent 2px);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+      box-sizing: border-box;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .cert-inner {
+      width: 100%;
+      height: 100%;
+      background-color: #ffffff;
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 80px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      margin-bottom: 60px;
+    }
+
+    .logo-icon {
+      background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+      color: white;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 24px;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .logo-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      color: #0f172a;
+      letter-spacing: 1px;
+    }
+
+    .candidate-name {
+      font-size: 36px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 15px;
+    }
+
+    .completion-text {
+      font-size: 18px;
+      color: #475569;
+      margin-bottom: 30px;
+    }
+
+    .certification-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 80px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      align-items: flex-end;
+      position: absolute;
+      bottom: 80px;
+      padding: 0 80px;
+      box-sizing: border-box;
+    }
+
+    .footer-left {
+      font-size: 12px;
+      color: #334155;
+      line-height: 2;
+    }
+
+    .online-verifiable {
+      margin-top: 15px;
+      background-color: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      font-size: 13px;
+      color: #0f172a;
+    }
+
+    .check-icon {
+      font-weight: bold;
+    }
+
+    .badge-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(-20px);
+    }
+
+    .badge-shield {
+      width: 120px;
+      height: 140px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      clip-path: polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 0% 80%, 0% 20%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 25px;
+      box-shadow: inset 0 0 0 4px #bae6fd;
+    }
+
+    .badge-text-top {
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .badge-banner {
+      background: white;
+      color: #0f172a;
+      padding: 6px 15px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      z-index: 2;
+      position: relative;
+    }
+
+    .badge-star {
+      color: white;
+      font-size: 28px;
+      margin-top: 5px;
+    }
+
+    .footer-right {
+      text-align: center;
+    }
+
+    .signature {
+      font-family: 'Brush Script MT', cursive;
+      font-size: 32px;
+      color: #0f172a;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 5px;
+      margin-bottom: 5px;
+      display: inline-block;
+      min-width: 200px;
+    }
+
+    .signatory-name {
+      font-size: 12px;
+      color: #475569;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="cert-outer">
+    <div class="cert-inner">
+
+      <div class="logo-container">
+        <div class="logo-icon">C</div>
+        <div class="logo-text">CodeForge</div>
+      </div>
+
+      <div class="candidate-name">Dadasaheb Lokhande</div>
+
+      <div class="completion-text">
+        has successfully passed all requirements for
+      </div>
+
+      <div class="certification-title">
+        C Programming Fundamentals
+      </div>
+
+      <div class="footer">
+
+        <div class="footer-left">
+          <div>Credential ID: C18A87F5CA2658F4</div>
+          <div>Certification number: 100-PT-3500</div>
+          <div>Earned on: March 14, 2026</div>
+          <div class="online-verifiable">
+            <span class="check-icon">✓</span> Online Verifiable
+          </div>
+        </div>
+
+        <div class="badge-container">
+          <div class="badge-shield">
+            <div class="badge-text-top">CodeForge<br>Certified</div>
+            <div class="badge-banner">FUNDAMENTALS</div>
+            <div class="badge-star">★</div>
+          </div>
+        </div>
+
+        <div class="footer-right">
+          <div class="signature">CodeForge AI</div>
+          <div class="signatory-name">Platform Administrator</div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+</html>

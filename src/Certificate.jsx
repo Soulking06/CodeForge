@@ -5,20 +5,43 @@ import html2canvas from 'html2canvas';
 export default function Certificate({ username, progressScore }) {
   const certificateRef = useRef(null);
 
+  // Generate a random-looking credential ID
+  const generateHash = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
+  };
+
   const downloadCertificate = () => {
     const element = certificateRef.current;
     
+    // Temporarily make it visible for html2canvas
+    element.style.top = '0px';
+    element.style.left = '0px';
+    element.style.position = 'relative';
+
     html2canvas(element, { scale: 3 }).then((canvas) => {
       const imgData = canvas.toDataURL('image/png');
-      // Create a landscape PDF
       const pdf = new jsPDF('l', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`CodeForge_Certificate_${username}.pdf`);
+      pdf.save(`CodeForge_Certificate_${username.replace(/\s+/g, '_')}.pdf`);
+
+      // Hide it back
+      element.style.position = 'absolute';
+      element.style.top = '-10000px';
+      element.style.left = '-10000px';
     });
   };
+
+  const credentialId = `C${generateHash(username + 'codeforge')}A87F${generateHash(progressScore.toString())}`;
+  const certNumber = `${progressScore}-PT-3500`;
+  const dateFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <div style={{ marginTop: '2rem', textAlign: 'center' }}>
@@ -48,68 +71,178 @@ export default function Certificate({ username, progressScore }) {
         left: '-10000px'
       }}>
         <div ref={certificateRef} style={{
-          width: '1123px',  // A4 Landscape 150dpi roughly
+          width: '1123px',  // A4 Landscape 150dpi
           height: '794px',
-          background: '#0a0b14',
-          border: '15px solid #0ea5e9',
+          padding: '40px',
+          backgroundColor: '#0f172a',
+          backgroundImage: 'radial-gradient(#1e293b 2px, transparent 2px), radial-gradient(#1e293b 2px, transparent 2px)',
+          backgroundSize: '30px 30px',
+          backgroundPosition: '0 0, 15px 15px',
           boxSizing: 'border-box',
-          padding: '60px',
-          fontFamily: 'sans-serif',
-          color: '#ffffff',
-          position: 'relative',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
+          fontFamily: '"Inter", sans-serif',
         }}>
-          {/* Decorative background elements */}
           <div style={{
-            position: 'absolute',
-            top: '-200px',
-            right: '-200px',
-            width: '600px',
-            height: '600px',
-            background: 'radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 60%)',
-            borderRadius: '50%'
-          }}></div>
-          <div style={{
-            position: 'absolute',
-            bottom: '-200px',
-            left: '-200px',
-            width: '600px',
-            height: '600px',
-            background: 'radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 60%)',
-            borderRadius: '50%'
-          }}></div>
-          
-          <h1 style={{ fontFamily: '"Orbitron", sans-serif', fontSize: '3rem', color: '#0ea5e9', marginBottom: '20px', letterSpacing: '4px' }}>
-            CERTIFICATE OF COMPLETION
-          </h1>
-          <p style={{ fontSize: '1.5rem', color: '#94a3b8', marginBottom: '40px' }}>
-            This is to certify that
-          </p>
-          <h2 style={{ fontSize: '4rem', color: '#fff', borderBottom: '2px solid #22d3ee', paddingBottom: '10px', marginBottom: '40px', fontFamily: '"Fira Code", monospace' }}>
-            {username}
-          </h2>
-          <p style={{ fontSize: '1.5rem', color: '#94a3b8', textAlign: 'center', maxWidth: '800px', lineHeight: '1.6' }}>
-            has successfully completed the comprehensive <strong style={{color: '#fff'}}>C Programming Language Platform</strong> on CodeForge, demonstrating mastery of syntax, pointers, memory management, and system concepts.
-          </p>
-          
-          <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0 100px' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.2rem', color: '#fff', fontWeight: 'bold' }}>Final Score: {progressScore} PTS</div>
-              <div style={{ borderTop: '1px solid #64748b', marginTop: '10px', paddingTop: '10px', color: '#64748b' }}>PERFORMANCE</div>
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#ffffff',
+            boxSizing: 'border-box',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '60px 80px'
+          }}>
+            
+            {/* Logo area */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '20px', marginBottom: '60px' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                color: 'white',
+                width: '40px',
+                height: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '8px',
+                fontWeight: '700',
+                fontSize: '24px',
+                fontFamily: '"Orbitron", sans-serif'
+              }}>C</div>
+              <div style={{
+                fontFamily: '"Orbitron", sans-serif',
+                fontSize: '28px',
+                color: '#0f172a',
+                letterSpacing: '1px'
+              }}>CodeForge</div>
+            </div>
+
+            {/* Candidate Info */}
+            <div style={{ fontSize: '36px', fontWeight: '700', color: '#0f172a', marginBottom: '15px' }}>
+              {username}
             </div>
             
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ width: '80px', height: '80px', border: '3px solid #10b981', borderRadius: '50%', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: '#10b981' }}>★</div>
-              <div style={{ borderTop: '1px solid #64748b', marginTop: '10px', paddingTop: '10px', color: '#64748b' }}>VERIFIED BY CODEFORGE</div>
+            <div style={{ fontSize: '18px', color: '#475569', marginBottom: '30px' }}>
+              has successfully passed all requirements for
             </div>
-            
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '1.2rem', color: '#fff' }}>{new Date().toLocaleDateString()}</div>
-              <div style={{ borderTop: '1px solid #64748b', marginTop: '10px', paddingTop: '10px', color: '#64748b' }}>DATE ISSUED</div>
+
+            <div style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a', marginBottom: '80px' }}>
+              CodeForge Certified: C Programming Fundamentals
+            </div>
+
+            {/* Footer Area */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              width: '100%',
+              alignItems: 'flex-end',
+              position: 'absolute',
+              bottom: '80px',
+              padding: '0 80px',
+              boxSizing: 'border-box'
+            }}>
+              
+              {/* Footer Left */}
+              <div style={{ fontSize: '12px', color: '#334155', lineHeight: '2' }}>
+                <div>Credential ID: {credentialId}</div>
+                <div>Certification number: {certNumber}</div>
+                <div>Earned on: {dateFormatted}</div>
+                <div style={{
+                  marginTop: '15px',
+                  backgroundColor: '#f1f5f9',
+                  padding: '6px 12px',
+                  borderRadius: '12px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontWeight: '500',
+                  fontSize: '13px',
+                  color: '#0f172a'
+                }}>
+                  <span style={{ fontWeight: 'bold' }}>✓</span> Online Verifiable
+                </div>
+              </div>
+
+              {/* Badge Area */}
+              <div style={{
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transform: 'translateY(-20px)'
+              }}>
+                {/* CSS Shield */}
+                <div style={{
+                  width: '120px',
+                  height: '140px',
+                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  clipPath: 'polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 0% 80%, 0% 20%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  paddingTop: '25px',
+                  boxShadow: 'inset 0 0 0 4px #bae6fd' // Note: inset shadow might not fully render on clip-path in html2canvas but provides fallback
+                }}>
+                  {/* Since html2canvas struggles with inset shadow + clip paths sometimes, add a nested div */}
+                  <div style={{
+                    width: '112px',
+                    height: '132px',
+                    background: 'transparent',
+                    border: '2px solid #bae6fd',
+                    clipPath: 'polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 0% 80%, 0% 20%)',
+                    position: 'absolute',
+                    top: '4px',
+                    left: '2px' // offset adjustment
+                  }}></div>
+
+                  <div style={{
+                    color: 'white',
+                    fontSize: '10px',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    textAlign: 'center',
+                    marginBottom: '5px',
+                    zIndex: 2
+                  }}>CodeForge<br/>Certified</div>
+                  <div style={{
+                    background: 'white',
+                    color: '#0f172a',
+                    padding: '6px 15px',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    borderRadius: '4px',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                    marginBottom: '10px',
+                    letterSpacing: '1px',
+                    zIndex: 2,
+                    position: 'relative'
+                  }}>FUNDAMENTALS</div>
+                  <div style={{
+                    color: 'white',
+                    fontSize: '28px',
+                    marginTop: '5px',
+                    zIndex: 2
+                  }}>★</div>
+                </div>
+              </div>
+
+              {/* Footer Right */}
+              <div style={{ textAlign: 'center' }}>
+                <div style={{
+                  fontFamily: 'cursive, "Brush Script MT"', // graceful fallback for script
+                  fontSize: '32px',
+                  color: '#0f172a',
+                  borderBottom: '1px solid #cbd5e1',
+                  paddingBottom: '5px',
+                  marginBottom: '5px',
+                  display: 'inline-block',
+                  minWidth: '200px',
+                  fontStyle: 'italic'
+                }}>CodeForge AI</div>
+                <div style={{ fontSize: '12px', color: '#475569', fontWeight: '500' }}>Platform Administrator</div>
+              </div>
+
             </div>
           </div>
         </div>
