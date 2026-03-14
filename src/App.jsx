@@ -18,6 +18,7 @@ function App() {
   const [points, setPoints] = useState(0);
   const [animatePoints, setAnimatePoints] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [selectedLang, setSelectedLang] = useState('c');
 
   // Auth Handling
   const handleLogin = (jwt, user) => {
@@ -197,8 +198,9 @@ function App() {
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <select 
-              readOnly 
-              title="More languages coming in future updates!"
+              value={selectedLang}
+              onChange={(e) => setSelectedLang(e.target.value)}
+              title="Select the language for your course and certificate"
               style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',
@@ -211,9 +213,9 @@ function App() {
               }}
             >
               <option value="c">C Programming</option>
-              <option value="python" disabled>Python 3 (Coming Soon)</option>
-              <option value="java" disabled>Java 21 (Coming Soon)</option>
-              <option value="cpp" disabled>C++ 20 (Coming Soon)</option>
+              <option value="python">Python 3 Fundamentals</option>
+              <option value="java">Java 21 Fundamentals</option>
+              <option value="cpp">C++ 20 Fundamentals</option>
             </select>
 
             <button 
@@ -253,7 +255,7 @@ function App() {
 
               {/* Certificate Button shown on completing all topics */}
               {isAllComplete && (
-                <Certificate username={username} progressScore={points} />
+                <Certificate username={username} progressScore={points} language={selectedLang} />
               )}
 
             </div>

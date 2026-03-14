@@ -2,8 +2,17 @@ import React, { useRef } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-export default function Certificate({ username, progressScore }) {
+export default function Certificate({ username, progressScore, language }) {
   const certificateRef = useRef(null);
+
+  const langConfig = {
+    c: { name: 'C Programming', short: 'C', g1: '#0ea5e9', g2: '#3b82f6', shield1: '#0284c7', shield2: '#0369a1', line: '#bae6fd' },
+    python: { name: 'Python 3', short: 'Py', g1: '#fcd34d', g2: '#f59e0b', shield1: '#d97706', shield2: '#b45309', line: '#fde68a' },
+    java: { name: 'Java 21', short: 'Java', g1: '#fca5a5', g2: '#ef4444', shield1: '#dc2626', shield2: '#991b1b', line: '#fecaca' },
+    cpp: { name: 'C++ 20', short: 'C++', g1: '#93c5fd', g2: '#3b82f6', shield1: '#2563eb', shield2: '#1d4ed8', line: '#bfdbfe' },
+  };
+  
+  const currentLang = langConfig[language] || langConfig.c;
 
   // Generate a random-looking credential ID
   const generateHash = (str) => {
@@ -96,7 +105,7 @@ export default function Certificate({ username, progressScore }) {
             {/* Logo area */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '20px', marginBottom: '60px' }}>
               <div style={{
-                background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                background: `linear-gradient(135deg, ${currentLang.g1}, ${currentLang.g2})`,
                 color: 'white',
                 width: '40px',
                 height: '40px',
@@ -107,7 +116,7 @@ export default function Certificate({ username, progressScore }) {
                 fontWeight: '700',
                 fontSize: '24px',
                 fontFamily: '"Orbitron", sans-serif'
-              }}>C</div>
+              }}>{currentLang.short}</div>
               <div style={{
                 fontFamily: '"Orbitron", sans-serif',
                 fontSize: '28px',
@@ -126,7 +135,7 @@ export default function Certificate({ username, progressScore }) {
             </div>
 
             <div style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a', marginBottom: '80px' }}>
-              CodeForge Certified: C Programming Fundamentals
+              CodeForge Certified: {currentLang.name} Fundamentals
             </div>
 
             {/* Footer Area */}
@@ -175,20 +184,20 @@ export default function Certificate({ username, progressScore }) {
                 <div style={{
                   width: '120px',
                   height: '140px',
-                  background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                  background: `linear-gradient(135deg, ${currentLang.shield1}, ${currentLang.shield2})`,
                   clipPath: 'polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 0% 80%, 0% 20%)',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   paddingTop: '25px',
-                  boxShadow: 'inset 0 0 0 4px #bae6fd' // Note: inset shadow might not fully render on clip-path in html2canvas but provides fallback
+                  boxShadow: `inset 0 0 0 4px ${currentLang.line}` // Note: inset shadow might not fully render on clip-path in html2canvas but provides fallback
                 }}>
                   {/* Since html2canvas struggles with inset shadow + clip paths sometimes, add a nested div */}
                   <div style={{
                     width: '112px',
                     height: '132px',
                     background: 'transparent',
-                    border: '2px solid #bae6fd',
+                    border: `2px solid ${currentLang.line}`,
                     clipPath: 'polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 0% 80%, 0% 20%)',
                     position: 'absolute',
                     top: '4px',
