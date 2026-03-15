@@ -20,6 +20,13 @@ function App() {
   const [animatePoints, setAnimatePoints] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedLang, setSelectedLang] = useState('c');
+  const [isSandbox, setIsSandbox] = useState(false);
+  const [playgroundCode, setPlaygroundCode] = useState({
+    c: '#include <stdio.h>\n\nint main() {\n    printf("Hello from C Sandbox!");\n    return 0;\n}',
+    python: 'print("Hello from Python Sandbox!")',
+    java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello from Java Sandbox!");\n    }\n}',
+    cpp: '#include <iostream>\n\nint main() {\n    std::cout << "Hello from C++ Sandbox!" << std::endl;\n    return 0;\n}'
+  });
 
   // Auth Handling
   const handleLogin = (jwt, user, full) => {
@@ -82,7 +89,10 @@ function App() {
       const response = await fetch('/api/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ 
+          code: isSandbox ? playgroundCode[selectedLang] : code, 
+          language: selectedLang 
+        })
       });
       
       const data = await response.json();
@@ -96,7 +106,7 @@ function App() {
         setOutput(data.output);
         setIsError(false);
         
-        if (topic.validate(data.output)) {
+        if (!isSandbox && topic.validate(data.output)) {
           // If validated, update backend
           if (!completed.has(topic.id)) {
             fetch('/api/progress', {
@@ -181,11 +191,29 @@ function App() {
         <div style={{ padding: '0 1.5rem', marginBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}></div>
         
         <div className="topic-list">
+          <button
+            className={`topic-item ${isSandbox ? 'active' : ''}`}
+            onClick={() => setIsSandbox(true)}
+            style={{ marginBottom: '0.5rem', color: isSandbox ? 'var(--c-cyan)' : 'var(--text-dim)', background: isSandbox ? 'rgba(14, 165, 233, 0.1)' : 'transparent' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Code2 size={18} />
+              <span>Free Playground</span>
+            </div>
+          </button>
+
+          <div style={{ padding: '0.5rem 1.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Course Topics
+          </div>
+
           {TOPICS.map(t => (
             <button
               key={t.id}
-              className={`topic-item ${currentTopicId === t.id ? 'active' : ''} ${completed.has(t.id) ? 'completed' : ''}`}
-              onClick={() => setCurrentTopicId(t.id)}
+              className={`topic-item ${!isSandbox && currentTopicId === t.id ? 'active' : ''} ${completed.has(t.id) ? 'completed' : ''}`}
+              onClick={() => {
+                setIsSandbox(false);
+                setCurrentTopicId(t.id);
+              }}
             >
               <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: '1rem' }}>{t.title}</span>
               {completed.has(t.id) && <CheckCircle2 size={16} className="status-icon" style={{ flexShrink: 0 }} />}
@@ -198,7 +226,11 @@ function App() {
       <main className="main-area">
         <header className="header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <h2><BookOpen size={24} color="var(--c-blue)" /> {topic.title}</h2>
+            {isSandbox ? (
+              <h2><Code2 size={24} color="var(--c-cyan)" /> Global Playground</h2>
+            ) : (
+              <h2><BookOpen size={24} color="var(--c-blue)" /> {topic.title}</h2>
+            )}
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -239,30 +271,48 @@ function App() {
         </header>
 
         <section className="workspace">
-          {/* Left Panel - Theory */}
+          {/* Left Panel - Theory or Stats */}
           <div className="theory-panel">
             <div className="panel-header">
-              THEORY & CONCEPTS
+              {isSandbox ? 'PLAYGROUND INFO' : 'THEORY & CONCEPTS'}
             </div>
             <div className="theory-content">
-              {topic.theory}
-              
-              {!completed.has(topic.id) ? (
-                <div className="challenge-box">
-                  {topic.challenge}
+              {isSandbox ? (
+                <div style={{ color: 'var(--text-dim)' }}>
+                  <h3>Sandbox Mode</h3>
+                  <p>Welcome to the Free Playground! Here you can write and execute code in multiple languages without any restrictions.</p>
+                  <ul style={{ marginTop: '1.5rem' }}>
+                    <li><strong>Language:</strong> Use the dropdown above to switch between C, C++, Python, and Java.</li>
+                    <li><strong>Persistence:</strong> Code written here is stored in your current session.</li>
+                    <li><strong>Execution:</strong> Your code runs in a secure, sandboxed environment with a 5-second timeout.</li>
+                  </ul>
+                  
+                  <div className="challenge-box" style={{ marginTop: '2rem', background: 'rgba(168, 85, 247, 0.05)', borderLeftColor: 'var(--c-purple)' }}>
+                    <h4 style={{ color: 'var(--c-purple)' }}>Pro Tip:</h4>
+                    <p>For Java, please ensure your main class is named <code>Main</code>.</p>
+                  </div>
                 </div>
               ) : (
-                <div className="challenge-box" style={{ background: 'rgba(16, 185, 129, 0.05)', borderLeftColor: 'var(--c-green)' }}>
-                  <h4 style={{ color: 'var(--c-green)' }}>Challenge Completed!</h4>
-                  <p>Great job! You have fully mastered this section.</p>
-                </div>
-              )}
+                <>
+                  {topic.theory}
+                  
+                  {!completed.has(topic.id) ? (
+                    <div className="challenge-box">
+                      {topic.challenge}
+                    </div>
+                  ) : (
+                    <div className="challenge-box" style={{ background: 'rgba(16, 185, 129, 0.05)', borderLeftColor: 'var(--c-green)' }}>
+                      <h4 style={{ color: 'var(--c-green)' }}>Challenge Completed!</h4>
+                      <p>Great job! You have fully mastered this section.</p>
+                    </div>
+                  )}
 
-              {/* Certificate Button shown on completing all topics */}
-              {isAllComplete && (
-                <Certificate username={fullname || username} progressScore={points} language={selectedLang} />
+                  {/* Certificate Button shown on completing all topics */}
+                  {isAllComplete && (
+                    <Certificate username={fullname || username} progressScore={points} language={selectedLang} />
+                  )}
+                </>
               )}
-
             </div>
           </div>
 
@@ -270,13 +320,22 @@ function App() {
           <div className="code-panel">
             
             <div className="editor-wrapper">
-              <div className="panel-header">
-                <Code2 size={16} /> main.c
+              <div className="panel-header" style={{ justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Code2 size={16} /> {isSandbox ? `main.${({c:'c', cpp:'cpp', python:'py', java:'java'}[selectedLang])}` : 'main.c'}
+                </div>
+                {isSandbox && <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>SANDBOX MODE</span>}
               </div>
               <textarea
                 className="code-textarea"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
+                value={isSandbox ? playgroundCode[selectedLang] : code}
+                onChange={(e) => {
+                  if (isSandbox) {
+                    setPlaygroundCode({ ...playgroundCode, [selectedLang]: e.target.value });
+                  } else {
+                    setCode(e.target.value);
+                  }
+                }}
                 spellCheck="false"
               />
             </div>

@@ -134,37 +134,67 @@ app.post('/api/progress', authenticateToken, async (req, res) => {
 
 // --- COMPILER API ---
 app.post('/api/run', (req, res) => {
-  const { code } = req.body;
+  const { code, language = 'c' } = req.body;
   if (!code) {
     return res.status(400).json({ status: 'error', output: 'No code provided.' });
   }
 
   const id = crypto.randomBytes(8).toString('hex');
-  const cFilePath = path.join(tempDir, `${id}.c`);
-  const exeFilePath = path.join(tempDir, `${id}`);
+  const extensions = { c: 'c', cpp: 'cpp', python: 'py', java: 'java' };
+  const ext = extensions[language] || 'c';
+  
+  // For Java, the filename must match the class name if it's public. 
+  // We'll assume the user writes a Main class or we'll wrap it if needed.
+  // To keep it simple, we'll use the id as the filename.
+  const filename = language === 'java' ? 'Main' : id; 
+  const workerDir = path.join(tempDir, id);
+  if (!fs.existsSync(workerDir)) fs.mkdirSync(workerDir);
 
-  fs.writeFileSync(cFilePath, code);
+  const filePath = path.join(workerDir, `${filename}.${ext}`);
+  fs.writeFileSync(filePath, code);
 
-  exec(`gcc ${cFilePath} -o ${exeFilePath}`, (compileErr, stdout, stderr) => {
-    if (compileErr) {
-      try { fs.unlinkSync(cFilePath); } catch(e) {}
-      return res.json({ status: 'error', output: stderr || compileErr.message });
-    }
+  let compileCmd = '';
+  let runCmd = '';
 
-    exec(`${exeFilePath}`, { timeout: 3000 }, (runErr, runStdout, runStderr) => {
-      try { fs.unlinkSync(cFilePath); } catch(e) {}
-      try { fs.unlinkSync(exeFilePath); } catch(e) {}
+  if (language === 'c') {
+    compileCmd = `gcc ${filePath} -o ${path.join(workerDir, id)}`;
+    runCmd = `${path.join(workerDir, id)}`;
+  } else if (language === 'cpp') {
+    compileCmd = `g++ ${filePath} -o ${path.join(workerDir, id)}`;
+    runCmd = `${path.join(workerDir, id)}`;
+  } else if (language === 'python') {
+    runCmd = `python3 ${filePath}`;
+  } else if (language === 'java') {
+    compileCmd = `javac ${filePath}`;
+    runCmd = `java -cp ${workerDir} Main`;
+  }
+
+  const execute = () => {
+    exec(runCmd, { timeout: 5000 }, (runErr, runStdout, runStderr) => {
+      // Cleanup
+      try { fs.rmSync(workerDir, { recursive: true, force: true }); } catch(e) {}
 
       if (runErr) {
         if (runErr.killed) {
-          return res.json({ status: 'error', output: 'Execution timed out (infinite loop?).' });
+          return res.json({ status: 'error', output: 'Execution timed out (5s limit).' });
         }
         return res.json({ status: 'error', output: runStderr || runErr.message });
       }
-
       res.json({ status: 'success', output: runStdout || runStderr });
     });
-  });
+  };
+
+  if (compileCmd) {
+    exec(compileCmd, (compileErr, stdout, stderr) => {
+      if (compileErr) {
+        try { fs.rmSync(workerDir, { recursive: true, force: true }); } catch(e) {}
+        return res.json({ status: 'error', output: stderr || compileErr.message });
+      }
+      execute();
+    });
+  } else {
+    execute();
+  }
 });
 
 // --- SERVE FRONTEND IN PRODUCTION ---
