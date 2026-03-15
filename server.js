@@ -38,6 +38,15 @@ let db;
       completed_topics TEXT DEFAULT '[]'
     );
   `);
+
+  // Migration: Check if fullname column exists, add it if not
+  const tableInfo = await db.all("PRAGMA table_info(users)");
+  const hasFullName = tableInfo.some(column => column.name === 'fullname');
+  if (!hasFullName) {
+    await db.exec("ALTER TABLE users ADD COLUMN fullname TEXT");
+    console.log("Migration: Added fullname column to users table");
+  }
+
   console.log("Database initialized");
 })();
 
