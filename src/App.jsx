@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Code2, Terminal, CheckCircle2, ChevronRight, BookOpen, Star, LogOut, Award } from 'lucide-react';
-import { TOPICS } from './topics';
+import { TOPICS_CONFIG } from './topics';
 import Auth from './Auth';
 import Certificate from './Certificate';
 import './index.css';
 
-function App() {
+const App = () => {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [username, setUsername] = useState(localStorage.getItem('username') || '');
   const [fullname, setFullname] = useState(localStorage.getItem('fullname') || '');
 
-  const [currentTopicId, setCurrentTopicId] = useState(1);
-  const [code, setCode] = useState(TOPICS[0].initialCode);
+  const [selectedLang, setSelectedLang] = useState(localStorage.getItem('selectedLang') || 'c');
+  const TOPICS = TOPICS_CONFIG[selectedLang] || TOPICS_CONFIG.c;
+  const [currentTopicId, setCurrentTopicId] = useState(TOPICS[0].id);
+  
+  const topic = TOPICS.find(t => t.id === currentTopicId) || TOPICS[0];
+
+  const [code, setCode] = useState(topic.initialCode);
   const [output, setOutput] = useState('');
   const [isError, setIsError] = useState(false);
   const [isCompiling, setIsCompiling] = useState(false);
@@ -19,7 +24,6 @@ function App() {
   const [points, setPoints] = useState(0);
   const [animatePoints, setAnimatePoints] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [selectedLang, setSelectedLang] = useState('c');
   const [isSandbox, setIsSandbox] = useState(false);
   const [playgroundCode, setPlaygroundCode] = useState({
     c: '#include <stdio.h>\n\nint main() {\n    printf("Hello from C Sandbox!");\n    return 0;\n}',
@@ -72,13 +76,21 @@ function App() {
     }
   }, [token]);
 
-  const topic = TOPICS.find(t => t.id === currentTopicId);
+  useEffect(() => {
+    if (!isSandbox) {
+      setCode(topic.initialCode);
+      setOutput('');
+      setIsError(false);
+    }
+    setShowModal(false);
+  }, [currentTopicId, isSandbox, topic.initialCode]);
 
   useEffect(() => {
-    setCode(topic.initialCode);
-    setOutput('');
-    setShowModal(false);
-  }, [topic]);
+    // When language changes, reset to first topic of that language
+    if (!isSandbox) {
+      setCurrentTopicId(TOPICS[0].id);
+    }
+  }, [selectedLang, isSandbox, TOPICS]);
 
   const compileAndRun = async () => {
     setOutput('Compiling code...');
@@ -115,7 +127,7 @@ function App() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
               },
-              body: JSON.stringify({ topicId: topic.id, pointsEarned: 100 })
+              body: JSON.stringify({ topicId: topic.id, pointsEarned: 100, language: selectedLang })
             })
             .then(res => res.json())
             .then(prog => {
@@ -141,8 +153,9 @@ function App() {
   };
 
   const handleNextTopic = () => {
-    if (currentTopicId < TOPICS.length) {
-      setCurrentTopicId(currentTopicId + 1);
+    const currentIndex = TOPICS.findIndex(t => t.id === currentTopicId);
+    if (currentIndex < TOPICS.length - 1) {
+      setCurrentTopicId(TOPICS[currentIndex + 1].id);
     }
     setShowModal(false);
   };
@@ -235,24 +248,18 @@ function App() {
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <select 
-              value={selectedLang}
-              onChange={(e) => setSelectedLang(e.target.value)}
-              title="Select the language for your course and certificate"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'var(--text-main)',
-                padding: '0.5rem 1rem',
-                borderRadius: '6px',
-                fontFamily: 'var(--font-sans)',
-                outline: 'none',
-                cursor: 'pointer'
+              className="lang-select" 
+              value={selectedLang} 
+              onChange={(e) => {
+                const newLang = e.target.value;
+                setSelectedLang(newLang);
+                localStorage.setItem('selectedLang', newLang);
               }}
             >
               <option value="c">C Programming</option>
-              <option value="python">Python 3 Fundamentals</option>
-              <option value="java">Java 21 Fundamentals</option>
-              <option value="cpp">C++ 20 Fundamentals</option>
+              <option value="cpp">C++ Programming</option>
+              <option value="python">Python 3</option>
+              <option value="java">Java Programming</option>
             </select>
 
             <button 
