@@ -8,6 +8,7 @@ import './index.css';
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [username, setUsername] = useState(localStorage.getItem('username') || '');
+  const [fullname, setFullname] = useState(localStorage.getItem('fullname') || '');
 
   const [currentTopicId, setCurrentTopicId] = useState(1);
   const [code, setCode] = useState(TOPICS[0].initialCode);
@@ -21,18 +22,22 @@ function App() {
   const [selectedLang, setSelectedLang] = useState('c');
 
   // Auth Handling
-  const handleLogin = (jwt, user) => {
+  const handleLogin = (jwt, user, full) => {
     localStorage.setItem('token', jwt);
     localStorage.setItem('username', user);
+    localStorage.setItem('fullname', full);
     setToken(jwt);
     setUsername(user);
+    setFullname(full);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('fullname');
     setToken('');
     setUsername('');
+    setFullname('');
     setCompleted(new Set());
     setPoints(0);
   };
@@ -255,7 +260,7 @@ function App() {
 
               {/* Certificate Button shown on completing all topics */}
               {isAllComplete && (
-                <Certificate username={username} progressScore={points} language={selectedLang} />
+                <Certificate username={fullname || username} progressScore={points} language={selectedLang} />
               )}
 
             </div>

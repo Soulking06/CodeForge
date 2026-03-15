@@ -32,6 +32,7 @@ let db;
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE,
+      fullname TEXT,
       password TEXT,
       points INTEGER DEFAULT 0,
       completed_topics TEXT DEFAULT '[]'
@@ -61,15 +62,15 @@ const authenticateToken = (req, res, next) => {
 
 // --- AUTH APIs ---
 app.post('/api/auth/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, fullname, password } = req.body;
   
-  if(!username || !password) return res.status(400).json({ error: 'Missing credentials' });
+  if(!username || !password || !fullname) return res.status(400).json({ error: 'Missing credentials or full name' });
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
-    const token = jwt.sign({ id: result.lastID, username }, JWT_SECRET);
-    res.json({ token, username });
+    const result = await db.run('INSERT INTO users (username, fullname, password) VALUES (?, ?, ?)', [username, fullname, hashedPassword]);
+    const token = jwt.sign({ id: result.lastID, username, fullname }, JWT_SECRET);
+    res.json({ token, username, fullname });
   } catch (err) {
     res.status(400).json({ error: 'Username already exists' });
   }
@@ -80,8 +81,8 @@ app.post('/api/auth/login', async (req, res) => {
   const user = await db.get('SELECT * FROM users WHERE username = ?', [username]);
 
   if (user && await bcrypt.compare(password, user.password)) {
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET);
-    res.json({ token, username: user.username });
+    const token = jwt.sign({ id: user.id, username: user.username, fullname: user.fullname }, JWT_SECRET);
+    res.json({ token, username: user.username, fullname: user.fullname });
   } else {
     res.status(400).json({ error: 'Invalid credentials' });
   }

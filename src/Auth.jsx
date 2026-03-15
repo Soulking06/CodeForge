@@ -4,6 +4,7 @@ import { Terminal } from 'lucide-react';
 export default function Auth({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
+  const [fullname, setFullname] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,7 @@ export default function Auth({ onLogin }) {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, fullname, password })
       });
 
       const data = await res.json();
@@ -30,7 +31,7 @@ export default function Auth({ onLogin }) {
         throw new Error(data.error || 'Authentication failed');
       }
 
-      onLogin(data.token, data.username);
+      onLogin(data.token, data.username, data.fullname);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -92,6 +93,25 @@ export default function Auth({ onLogin }) {
               fontFamily: 'var(--font-mono)'
             }}
           />
+          {!isLogin && (
+            <input
+              type="text"
+              placeholder="Full Name (for Certificate)"
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
+              required
+              style={{
+                width: '100%',
+                padding: '0.8rem 1rem',
+                background: '#010103',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '8px',
+                color: '#fff',
+                outline: 'none',
+                fontFamily: 'var(--font-mono)'
+              }}
+            />
+          )}
           <input
             type="password"
             placeholder="Password"
